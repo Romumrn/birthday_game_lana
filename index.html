@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendrier de l'Avent</title>
+    <title>Jeu de piste d'anniversaire</title>
     <style>
         * {
             margin: 0;
@@ -21,28 +21,43 @@
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 20px 10px;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                padding: 40px 20px;
+            }
         }
 
         h1 {
             text-align: center;
             color: white;
-            font-size: 3em;
-            margin-bottom: 40px;
+            font-size: 2em;
+            margin-bottom: 20px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            padding: 0 10px;
+        }
+
+        @media (min-width: 768px) {
+            h1 {
+                font-size: 3em;
+                margin-bottom: 40px;
+            }
         }
 
         .calendar-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
             max-width: 1200px;
             margin: 0 auto;
+            padding: 0 10px;
         }
 
         .box {
-            width: 100px;
-            height: 100px;
+            width: 100%;
+            aspect-ratio: 1;
             background: linear-gradient(145deg, #f0f0f0, #cacaca);
             border-radius: 10px;
             display: flex;
@@ -56,15 +71,41 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
+        @media (min-width: 768px) {
+            .calendar-grid {
+                grid-template-columns: repeat(8, 1fr);
+                gap: 15px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .calendar-grid {
+                grid-template-columns: repeat(10, 1fr);
+                gap: 20px;
+            }
+        }
+
         .box:hover {
             transform: scale(1.1) rotate(5deg);
             box-shadow: 7px 7px 20px rgba(0,0,0,0.4);
         }
 
         .box.opened {
-            background: linear-gradient(145deg, #4CAF50, #45a049);
             color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
+
+        /* Couleurs pastel arc-en-ciel */
+        .box.color-0 { background: linear-gradient(145deg, #FFB3BA, #FF8FA3); } /* Rose pastel */
+        .box.color-1 { background: linear-gradient(145deg, #FFDFBA, #FFC4A3); } /* Pêche pastel */
+        .box.color-2 { background: linear-gradient(145deg, #FFFFBA, #FFEB8C); } /* Jaune pastel */
+        .box.color-3 { background: linear-gradient(145deg, #BAFFC9, #8FFFA8); } /* Vert clair pastel */
+        .box.color-4 { background: linear-gradient(145deg, #BAE1FF, #8CD4FF); } /* Bleu ciel pastel */
+        .box.color-5 { background: linear-gradient(145deg, #C9BAFF, #A58FFF); } /* Lavande pastel */
+        .box.color-6 { background: linear-gradient(145deg, #FFBAF3, #FF8FE3); } /* Magenta pastel */
+        .box.color-7 { background: linear-gradient(145deg, #FFD1DC, #FFB3C6); } /* Rose dragée */
+        .box.color-8 { background: linear-gradient(145deg, #B4E7CE, #8FDDBB); } /* Menthe pastel */
+        .box.color-9 { background: linear-gradient(145deg, #E0BBE4, #D291F0); } /* Lilas pastel */
 
         .modal {
             display: none;
@@ -178,24 +219,42 @@
 
         .verification-box {
             background: white;
-            padding: 50px;
+            padding: 30px 20px;
             border-radius: 20px;
             text-align: center;
-            max-width: 500px;
+            max-width: 90%;
+            width: 400px;
             animation: slideUp 0.5s ease;
         }
 
         .verification-box h2 {
             color: #667eea;
-            margin-bottom: 30px;
-            font-size: 28px;
+            margin-bottom: 20px;
+            font-size: 24px;
         }
 
         .verification-box p {
             color: #333;
-            margin-bottom: 30px;
-            font-size: 18px;
+            margin-bottom: 25px;
+            font-size: 16px;
             line-height: 1.6;
+        }
+
+        @media (min-width: 768px) {
+            .verification-box {
+                padding: 50px;
+                width: 500px;
+            }
+
+            .verification-box h2 {
+                font-size: 28px;
+                margin-bottom: 30px;
+            }
+
+            .verification-box p {
+                font-size: 18px;
+                margin-bottom: 30px;
+            }
         }
 
         .verification-buttons {
@@ -205,13 +264,20 @@
         }
 
         .verification-btn {
-            padding: 15px 40px;
-            font-size: 18px;
+            padding: 12px 30px;
+            font-size: 16px;
             border: none;
             border-radius: 10px;
             cursor: pointer;
             font-weight: bold;
             transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        @media (min-width: 768px) {
+            .verification-btn {
+                padding: 15px 40px;
+                font-size: 18px;
+            }
         }
 
         .verification-btn:hover {
@@ -233,11 +299,11 @@
 <body>
     <div class="verification-overlay" id="verificationOverlay">
         <div class="verification-box">
-            <h2>🎄 Bon anniversaire ! 🎁</h2>
-            <p>Aimes-tu les jeux ?</p>
+            <h2>🎄 Bienvenue ! 🎁</h2>
+            <p>Est tu prêtes à jouer ?</p>
             <div class="verification-buttons">
-                <button class="verification-btn btn-yes" onclick="grantAccess()">Oui trop !</button>
-                <button class="verification-btn btn-no" onclick="denyAccess()">Beurk les jeux</button>
+                <button class="verification-btn btn-yes" onclick="grantAccess()">Oui j'adore les jeux</button>
+                <button class="verification-btn btn-no" onclick="denyAccess()">Non j'ai moins de 18 ans</button>
             </div>
         </div>
     </div>
@@ -261,7 +327,7 @@
         }
 
         function denyAccess() {
-            alert('Dommage ! Revenez quand vous serez prête !');
+            alert('Dommage ! Revenez quand vous serez prêt(e) ! 🎄');
             window.location.href = 'https://www.google.com';
         }
 
@@ -280,14 +346,18 @@
         
         // Créer les 50 cases
         const calendar = document.getElementById('calendar');
-        const openedBoxes = JSON.parse(localStorage.getItem('openedBoxes') || '[]');
+        const openedBoxes = JSON.parse(localStorage.getItem('openedBoxes') || '{}');
 
         numbers.forEach(number => {
             const box = document.createElement('div');
             box.className = 'box';
-            if (openedBoxes.includes(number)) {
+            
+            // Si la case a déjà été ouverte, appliquer la couleur correspondante
+            if (openedBoxes[number] !== undefined) {
                 box.classList.add('opened');
+                box.classList.add(`color-${openedBoxes[number]}`);
             }
+            
             box.textContent = number;
             box.onclick = () => openBox(number, box);
             
@@ -295,11 +365,17 @@
         });
 
         async function openBox(number, element) {
-            // Marquer comme ouvert
-            if (!openedBoxes.includes(number)) {
-                openedBoxes.push(number);
+            // Marquer comme ouvert avec une couleur arc-en-ciel
+            if (openedBoxes[number] === undefined) {
+                // Compter combien de cases ont déjà été ouvertes pour attribuer la couleur
+                const openedCount = Object.keys(openedBoxes).length;
+                const colorIndex = openedCount % 10; // 10 couleurs disponibles
+                
+                openedBoxes[number] = colorIndex;
                 localStorage.setItem('openedBoxes', JSON.stringify(openedBoxes));
+                
                 element.classList.add('opened');
+                element.classList.add(`color-${colorIndex}`);
             }
 
             // Charger le contenu
