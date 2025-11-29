@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendrier de l'Avent</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 3em;
+            margin-bottom: 40px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .box {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(145deg, #f0f0f0, #cacaca);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            cursor: pointer;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .box:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 7px 7px 20px rgba(0,0,0,0.4);
+        }
+
+        .box.opened {
+            background: linear-gradient(145deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            animation: slideUp 0.5s ease;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 30px;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: #000;
+        }
+
+        .modal-header {
+            font-size: 28px;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .modal-body {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .modal-body img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        .modal-body video {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        .error-message {
+            color: #d32f2f;
+            font-style: italic;
+        }
+
+        .verification-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .verification-overlay.hidden {
+            display: none;
+        }
+
+        .verification-box {
+            background: white;
+            padding: 50px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            animation: slideUp 0.5s ease;
+        }
+
+        .verification-box h2 {
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .verification-box p {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        .verification-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .verification-btn {
+            padding: 15px 40px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .verification-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn-yes {
+            background: linear-gradient(145deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .btn-no {
+            background: linear-gradient(145deg, #f44336, #da190b);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="verification-overlay" id="verificationOverlay">
+        <div class="verification-box">
+            <h2>🎄 Bon anniversaire ! 🎁</h2>
+            <p>Aimes-tu les jeux ?</p>
+            <div class="verification-buttons">
+                <button class="verification-btn btn-yes" onclick="grantAccess()">Oui trop !</button>
+                <button class="verification-btn btn-no" onclick="denyAccess()">Beurk les jeux</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>🎁 Jeu de piste d'anniversaire 🎁</h1>
+        <div class="calendar-grid" id="calendar"></div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div class="modal-header" id="modalHeader"></div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        function grantAccess() {
+            document.getElementById('verificationOverlay').classList.add('hidden');
+        }
+
+        function denyAccess() {
+            alert('Dommage ! Revenez quand vous serez prête !');
+            window.location.href = 'https://www.google.com';
+        }
+
+        // Mélanger les numéros de 1 à 50 aléatoirement
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Créer un tableau de numéros mélangés
+        const numbers = shuffleArray(Array.from({length: 50}, (_, i) => i + 1));
+        
+        // Créer les 50 cases
+        const calendar = document.getElementById('calendar');
+        const openedBoxes = JSON.parse(localStorage.getItem('openedBoxes') || '[]');
+
+        numbers.forEach(number => {
+            const box = document.createElement('div');
+            box.className = 'box';
+            if (openedBoxes.includes(number)) {
+                box.classList.add('opened');
+            }
+            box.textContent = number;
+            box.onclick = () => openBox(number, box);
+            
+            calendar.appendChild(box);
+        });
+
+        async function openBox(number, element) {
+            // Marquer comme ouvert
+            if (!openedBoxes.includes(number)) {
+                openedBoxes.push(number);
+                localStorage.setItem('openedBoxes', JSON.stringify(openedBoxes));
+                element.classList.add('opened');
+            }
+
+            // Charger le contenu
+            const modal = document.getElementById('modal');
+            const modalHeader = document.getElementById('modalHeader');
+            const modalBody = document.getElementById('modalBody');
+            
+            modalHeader.textContent = `Case n°${number}`;
+            modalBody.innerHTML = '<p>Chargement...</p>';
+            modal.classList.add('active');
+
+            try {
+                // Essayer de charger différents types de fichiers
+                const content = await loadContent(number);
+                modalBody.innerHTML = content;
+            } catch (error) {
+                modalBody.innerHTML = `<p class="error-message">Contenu non disponible pour cette case.</p>`;
+            }
+        }
+
+        async function loadContent(number) {
+            // Essayer de charger dans cet ordre : texte, image, vidéo
+            const basePath = `content/${number}`;
+            
+            // Essayer fichier texte
+            try {
+                const textResponse = await fetch(`${basePath}.txt`);
+                if (textResponse.ok) {
+                    const text = await textResponse.text();
+                    return `<p>${text}</p>`;
+                }
+            } catch (e) {}
+
+            // Essayer image
+            const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            for (let ext of imageExtensions) {
+                try {
+                    const imgResponse = await fetch(`${basePath}.${ext}`);
+                    if (imgResponse.ok) {
+                        return `<img src="${basePath}.${ext}" alt="Image case ${number}">`;
+                    }
+                } catch (e) {}
+            }
+
+            // Essayer vidéo
+            const videoExtensions = ['mp4', 'webm', 'ogg'];
+            for (let ext of videoExtensions) {
+                try {
+                    const videoResponse = await fetch(`${basePath}.${ext}`);
+                    if (videoResponse.ok) {
+                        return `<video controls><source src="${basePath}.${ext}" type="video/${ext}">Votre navigateur ne supporte pas la vidéo.</video>`;
+                    }
+                } catch (e) {}
+            }
+
+            throw new Error('Aucun contenu trouvé');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        // Fermer avec Échap
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Fermer en cliquant en dehors
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
