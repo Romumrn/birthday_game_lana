@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jeu de piste d'anniversaire</title>
+    <link rel="icon" type="image/png" href="logo.png">
     <style>
         * {
             margin: 0;
@@ -48,7 +49,7 @@
 
         .calendar-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 10px;
             max-width: 1200px;
             margin: 0 auto;
@@ -346,7 +347,7 @@
         
         // Créer les 50 cases
         const calendar = document.getElementById('calendar');
-        const openedBoxes = JSON.parse(localStorage.getItem('openedBoxes') || '{}');
+        const openedBoxes = {}; // Réinitialiser à chaque chargement de page
 
         numbers.forEach(number => {
             const box = document.createElement('div');
@@ -372,7 +373,7 @@
                 const colorIndex = openedCount % 10; // 10 couleurs disponibles
                 
                 openedBoxes[number] = colorIndex;
-                localStorage.setItem('openedBoxes', JSON.stringify(openedBoxes));
+                // Ne plus sauvegarder dans localStorage
                 
                 element.classList.add('opened');
                 element.classList.add(`color-${colorIndex}`);
@@ -397,41 +398,48 @@
         }
 
         async function loadContent(number) {
-            // Essayer de charger dans cet ordre : texte, image, vidéo
+            // Charger tous les types de contenu disponibles
             const basePath = `content/${number}`;
+            let contents = [];
             
-            // Essayer fichier texte
+            // Essayer de charger le fichier texte
             try {
                 const textResponse = await fetch(`${basePath}.txt`);
                 if (textResponse.ok) {
                     const text = await textResponse.text();
-                    return `<p>${text}</p>`;
+                    contents.push(`<p>${text}</p>`);
                 }
             } catch (e) {}
 
-            // Essayer image
+            // Essayer de charger les images (incluant GIF)
             const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
             for (let ext of imageExtensions) {
                 try {
                     const imgResponse = await fetch(`${basePath}.${ext}`);
                     if (imgResponse.ok) {
-                        return `<img src="${basePath}.${ext}" alt="Image case ${number}">`;
+                        contents.push(`<img src="${basePath}.${ext}" alt="Image case ${number}">`);
                     }
                 } catch (e) {}
             }
 
-            // Essayer vidéo
+            // Essayer de charger les vidéos
             const videoExtensions = ['mp4', 'webm', 'ogg'];
             for (let ext of videoExtensions) {
                 try {
                     const videoResponse = await fetch(`${basePath}.${ext}`);
                     if (videoResponse.ok) {
-                        return `<video controls><source src="${basePath}.${ext}" type="video/${ext}">Votre navigateur ne supporte pas la vidéo.</video>`;
+                        contents.push(`<video controls><source src="${basePath}.${ext}" type="video/${ext}">Votre navigateur ne supporte pas la vidéo.</video>`);
                     }
                 } catch (e) {}
             }
 
-            throw new Error('Aucun contenu trouvé');
+            // Si aucun contenu n'est trouvé, lever une erreur
+            if (contents.length === 0) {
+                throw new Error('Aucun contenu trouvé');
+            }
+
+            // Retourner tous les contenus combinés
+            return contents.join('');
         }
 
         function closeModal() {
