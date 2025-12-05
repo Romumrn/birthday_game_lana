@@ -1,1 +1,2 @@
-Test 3
+Le premiere indice est :
+Rendez vous dans la boulangerie de la meilleur rue de rue ! 
